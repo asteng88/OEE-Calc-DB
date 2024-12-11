@@ -2,14 +2,37 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
+# Callback function for clearing values
+def clear_values():
+    for key in ['planned_production', 'actual_run_time', 'target_part_count', 
+                'total_parts_made', 'good_parts']:
+        if key in st.session_state:
+            del st.session_state[key]
+
+# Initialize session state
+if 'planned_production' not in st.session_state:
+    st.session_state.planned_production = 0.0
+if 'actual_run_time' not in st.session_state:
+    st.session_state.actual_run_time = 0.0
+if 'target_part_count' not in st.session_state:
+    st.session_state.target_part_count = 0.0
+if 'total_parts_made' not in st.session_state:
+    st.session_state.total_parts_made = 0.0
+if 'good_parts' not in st.session_state:
+    st.session_state.good_parts = 0.0
+
 st.title('OEE Calculator')
 
-# Input fields
-planned_production = st.number_input('Planned production time', min_value=0.0, value=0.0, format="%.1f")
-actual_run_time = st.number_input('Actual Run Time', min_value=0.0, value=0.0, format="%.1f")
-target_part_count = st.number_input('Target Part Count', min_value=0.0, value=0.0, format="%.1f")
-total_parts_made = st.number_input('Total Parts Made', min_value=0.0, value=0.0, format="%.1f")
-good_parts = st.number_input('Good Parts', min_value=0.0, max_value=total_parts_made, value=0.0, format="%.1f")
+# Clear Values button (move it to the top)
+if st.button('Clear Values', on_click=clear_values):
+    st.rerun()
+
+# Input fields with session state
+planned_production = st.number_input('Planned production time', min_value=0.0, value=st.session_state.planned_production, format="%.1f", key='planned_production')
+actual_run_time = st.number_input('Actual Run Time', min_value=0.0, value=st.session_state.actual_run_time, format="%.1f", key='actual_run_time')
+target_part_count = st.number_input('Target Part Count', min_value=0.0, value=st.session_state.target_part_count, format="%.1f", key='target_part_count')
+total_parts_made = st.number_input('Total Parts Made', min_value=0.0, value=st.session_state.total_parts_made, format="%.1f", key='total_parts_made')
+good_parts = st.number_input('Good Parts', min_value=0.0, max_value=total_parts_made, value=st.session_state.good_parts, format="%.1f", key='good_parts')
 
 # Calculate OEE
 if st.button('Calculate OEE'):
@@ -56,7 +79,8 @@ if st.button('Calculate OEE'):
             dy=-10,
             font='bold', size=12
         ).encode(
-            text='Value:Q'
+            text=alt.Text('Value:Q', format='.2f')
         )
-
         st.altair_chart(chart + text, use_container_width=True)
+
+
